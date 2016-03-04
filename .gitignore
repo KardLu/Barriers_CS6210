@@ -3,3 +3,10 @@
 
 # text files
 *.txt
+
+# object files
+obj/
+
+# executable
+gtmp
+gtmpi
