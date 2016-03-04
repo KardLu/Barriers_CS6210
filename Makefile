@@ -2,18 +2,20 @@ CC = gcc
 CFLAGS = -g -Wall
 LDFLAGS = -fopenmp
 
+BIN_DIR = bin
 OBJ_DIR = obj
 OPENMP_DIR = OpenMP
 
-omp: gtmp.c $(OBJ_DIR)/sense.o
-	$(CC) -o gtmp $(OBJ_DIR)/sense.o $< $(CFLAGS) $(LDFLAGS)
+sense: $(OPENMP_DIR)/sense.c $(BIN_DIR)
+	$(CC) -o $(BIN_DIR)/sense $< $(CFLAGS) $(LDFLAGS)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
-$(OBJ_DIR)/sense.o: $(OPENMP_DIR)/sense.c | $(OBJ_DIR)
-	$(CC) -c -o $@ $< $(CFLAGS) $(LDFLAGS)
-
 clean:
+	rm -rf $(BIN_DIR)/
 	rm -rf $(OBJ_DIR)/
 	rm -f *.o gtmp gtmpi

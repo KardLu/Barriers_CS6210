@@ -1,42 +1,49 @@
 #include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
-#include "../gtmp.h"
 
-/*
-    From the MCS Paper: A sense-reversing centralized barrier
+int count;
+bool sense;
+void gtmp_barrier();
 
-    shared count : integer := P
-    shared sense : Boolean := true
-    processor private local_sense : Boolean := true
+int main(int argc, char **argv) {
+	if (argc < 3) {
+		fprintf(stderr, "Usage: ./sense NUM_THREADS NUM_ITERS\n");
+		return -1;
+	}
 
-    procedure central_barrier
-        local_sense := not local_sense // each processor toggles its own sense
-	if fetch_and_decrement (&count) = 1
-	    count := P
-	    sense := local_sense // last processor toggles global sense
-        else
-           repeat until sense = local_sense
-*/
-
-void gtmp_init(int num_threads){
-	count = num_threads;
+	count = atoi(argv[1]);
+	int iters = atoi(argv[2]);
 	sense = true;
-	local_sense = true;
+	omp_set_num_threads(count);
+
+	#pragma omp parallel shared(count,sense)
+	{
+		bool local_sense = true;
+		int i;
+		for (i = 0;i < iters;i++) {
+			printf("thread %d reaches the barrier!\n", omp_get_thread_num());
+			fflush(stdout);
+			gtmp_barrier(&local_sense);
+			printf("thread %d gets through the barrier!\n", omp_get_thread_num());
+			fflush(stdout);
+		}
+	}
+	return 0;
 }
 
-void gtmp_barrier(){
-	local_sense = !local_sense;
+void gtmp_barrier(bool *local_sense){
+	*local_sense = !(*local_sense);
 
 	#pragma omp atomic
 	count -= 1;
 
 	if (count == 0) {
-		count = omp_get_thread_num();
-		sense = local_sense;
+		count = omp_get_num_threads();
+		sense = *local_sense;
 	}
 	else {
-		while (sense != local_sense) {}
+		while (sense != (*local_sense)) {}
 	}
 }
-
-void gtmp_finalize(){}
