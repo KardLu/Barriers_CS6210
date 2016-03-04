@@ -12,3 +12,6 @@ gtmp
 gtmpi
 Tournament
 SenseReverse
+
+# OS X specific
+.DS_Store
