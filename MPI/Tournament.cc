@@ -73,9 +73,16 @@ int main(int argc, char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+	struct timeval startTV;
+	struct timeval endTV;
+	gettimeofday(&startTV, NULL);
+	for (int i = 0; i < 10; ++i) {
+		Tournament_Barrier();
+	}
+	gettimeofday(&endTV, NULL);
 
-	Tournament_Barrier();
-	std::cout<< "Size: " << size <<", Rank: " << rank << std::endl;
+	unsigned long tv = endTV.tv_usec - startTV.tv_usec;
+	std::cout << tv / 10 << std::endl;
 
 	MPI_Finalize();
 	return 0;
