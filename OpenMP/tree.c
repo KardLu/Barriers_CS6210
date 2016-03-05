@@ -81,8 +81,8 @@ int main(int argc, char **argv) {
         double start, end;
         start = omp_get_wtime();
         for (i = 0;i < iters;i++) {
-            printf("thread %d reaches the barrier!\n", omp_get_thread_num());
-            fflush(stdout);
+            // printf("thread %d reaches the barrier!\n", omp_get_thread_num());
+            // fflush(stdout);
             gtmp_barrier(tid, local_sense);
             local_sense = !local_sense;
             // printf("thread %d gets through the barrier!\n", omp_get_thread_num());
@@ -119,9 +119,9 @@ void gtmp_init(){
         else
             nodes[i].childpointers[0] = &(nodes[i].dummy);
         if ((2 * i + 2) < num_threads)
-            nodes[i].childpointers[0] = &(nodes[2*i+2].parentsense);
+            nodes[i].childpointers[1] = &(nodes[2*i+2].parentsense);
         else
-            nodes[i].childpointers[0] = &(nodes[i].dummy);
+            nodes[i].childpointers[1] = &(nodes[i].dummy);
         nodes[i].parentsense = false;
     }
 }
@@ -134,7 +134,7 @@ void gtmp_barrier(int tid, bool sense){
     }
     *(nodes[tid].parentpointer) = false;
     if (tid > 0) {
-        while (nodes[i].parentsense != sense) ;
+        while (nodes[tid].parentsense != sense) ;
     }
     *(nodes[tid].childpointers[0]) = sense;
     *(nodes[tid].childpointers[1]) = sense;
