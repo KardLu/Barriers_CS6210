@@ -6,8 +6,13 @@ BIN_DIR = bin
 OBJ_DIR = obj
 OPENMP_DIR = OpenMP
 
-sense: $(OPENMP_DIR)/sense.c $(BIN_DIR)
+all: omp_sense omp_tree
+
+omp_sense: $(OPENMP_DIR)/sense.c $(BIN_DIR)
 	$(CC) -o $(BIN_DIR)/sense $< $(CFLAGS) $(LDFLAGS)
+
+omp_tree: $(OPENMP_DIR)/tree.c $(BIN_DIR)
+	$(CC) -o $(BIN_DIR)/tree $< $(CFLAGS) $(LDFLAGS)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
