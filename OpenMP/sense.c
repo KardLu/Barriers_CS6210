@@ -22,13 +22,17 @@ int main(int argc, char **argv) {
 	{
 		bool local_sense = true;
 		int i;
+		double start, end;
+		start = omp_get_wtime();
 		for (i = 0;i < iters;i++) {
-			printf("thread %d reaches the barrier!\n", omp_get_thread_num());
-			fflush(stdout);
+			// printf("thread %d reaches the barrier!\n", omp_get_thread_num());
+			// fflush(stdout);
 			gtmp_barrier(&local_sense);
-			printf("thread %d gets through the barrier!\n", omp_get_thread_num());
-			fflush(stdout);
+			// printf("thread %d gets through the barrier!\n", omp_get_thread_num());
+			// fflush(stdout);
 		}
+		end = omp_get_wtime();
+		printf("time: %f\n", end - start);
 	}
 	return 0;
 }
