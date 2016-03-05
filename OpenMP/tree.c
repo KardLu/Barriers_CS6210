@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 }
 
 void gtmp_init(){
-    nodes = (treenode *) aligned_alloc(LEVEL1_DCACHE_LINESIZE, num_threads * LEVEL1_DCACHE_LINESIZE);
+    posix_memalign((void **) &nodes, LEVEL1_DCACHE_LINESIZE, num_threads * LEVEL1_DCACHE_LINESIZE);
     // nodes = (treenode *) malloc(num_threads * sizeof(treenode));
     int i, j;
     for (i = 0;i < num_threads;i++) {
