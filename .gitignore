@@ -11,4 +11,11 @@ obj/
 gtmp
 gtmpi
 Tournament
+<<<<<<< HEAD
 MCS
+=======
+SenseReverse
+
+# OS X specific
+.DS_Store
+>>>>>>> 926883db7d4bb3af95194d52e5d100ba13311bb9
