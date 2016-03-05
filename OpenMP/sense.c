@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 int count;
 bool sense;
@@ -18,12 +19,12 @@ int main(int argc, char **argv) {
 	sense = true;
 	omp_set_num_threads(count);
 
+	clock_t start, end;
+	start = clock();
 	#pragma omp parallel shared(count,sense)
 	{
 		bool local_sense = true;
 		int i;
-		double start, end;
-		start = omp_get_wtime();
 		for (i = 0;i < iters;i++) {
 			// printf("thread %d reaches the barrier!\n", omp_get_thread_num());
 			// fflush(stdout);
@@ -31,9 +32,10 @@ int main(int argc, char **argv) {
 			// printf("thread %d gets through the barrier!\n", omp_get_thread_num());
 			// fflush(stdout);
 		}
-		end = omp_get_wtime();
-		printf("time: %f\n", end - start);
+
 	}
+	end = clock();
+	printf("time: %lf\n", (double) (end - start) / CLOCKS_PER_SEC);
 	return 0;
 }
 
@@ -41,7 +43,7 @@ void gtmp_barrier(bool *local_sense){
 	*local_sense = !(*local_sense);
 
 	#pragma omp atomic
-	count -= 1;
+	--count;
 
 	if (count == 0) {
 		count = omp_get_num_threads();

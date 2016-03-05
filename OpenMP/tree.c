@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <omp.h>
+#include <time.h>
 
 /*
     From the MCS Paper: A scalable, distributed tree-based barrier with only local spinning.
@@ -50,6 +51,8 @@ typedef struct {
     bool havechild[4];
     bool childnotready[4];
     bool dummy;
+    // padding for the node; only works for 64 bytes cache line
+    int padding[4];
 } treenode;
 
 int num_threads;
@@ -71,15 +74,15 @@ int main(int argc, char **argv) {
     num_threads = atoi(argv[1]);
     int iters = atoi(argv[2]);
     omp_set_num_threads(num_threads);
-
     gtmp_init();
+
+    clock_t start, end;
+    start = clock();
     #pragma omp parallel default(shared)
     {
         bool local_sense = true;
         int tid = omp_get_thread_num();
         int i;
-        double start, end;
-        start = omp_get_wtime();
         for (i = 0;i < iters;i++) {
             // printf("thread %d reaches the barrier!\n", omp_get_thread_num());
             // fflush(stdout);
@@ -88,16 +91,17 @@ int main(int argc, char **argv) {
             // printf("thread %d gets through the barrier!\n", omp_get_thread_num());
             // fflush(stdout);
         }
-        end = omp_get_wtime();
-        printf("time: %f\n", end - start);
     }
+    end = clock();
+    printf("time: %lf\n", (double) (end - start) / CLOCKS_PER_SEC);
 
     gtmp_finalize();
     return 0;
 }
 
 void gtmp_init(){
-    nodes = (treenode *) malloc(num_threads * sizeof(treenode));
+    nodes = (treenode *) aligned_alloc(LEVEL1_DCACHE_LINESIZE, num_threads * LEVEL1_DCACHE_LINESIZE);
+    // nodes = (treenode *) malloc(num_threads * sizeof(treenode));
     int i, j;
     for (i = 0;i < num_threads;i++) {
         for (j = 0;j < 4;j++) {
