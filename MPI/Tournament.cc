@@ -7,6 +7,8 @@
 **********************************************************************/
 #include <mpi.h>
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
 
 int rank = -1;
 int size = -1;
@@ -85,16 +87,14 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	struct timeval startTV;
-	struct timeval endTV;
-	gettimeofday(&startTV, NULL);
+	clock_t start = clock();
 	for (int i = 0; i < numOfRound; ++i) {
 		Tournament_Barrier();
 	}
-	gettimeofday(&endTV, NULL);
+	clock_t end = clock();
 
-	double tv = endTV.tv_usec - startTV.tv_usec + 1000 * (endTV.tv_sec - startTV.tv_sec);
-	std::cout << tv * 1000 / numOfRound << std::endl;
+	double total = (double) (end - start) / CLOCKS_PER_SEC;
+	std::cout << total / numOfRound << std::endl;
 
 	MPI_Finalize();
 	return 0;
