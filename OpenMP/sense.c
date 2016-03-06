@@ -42,10 +42,7 @@ int main(int argc, char **argv) {
 void gtmp_barrier(bool *local_sense){
 	*local_sense = !(*local_sense);
 
-	#pragma omp atomic
-	--count;
-
-	if (count == 0) {
+	if (__sync_fetch_and_sub(&count, 1) == 1) {
 		count = omp_get_num_threads();
 		sense = *local_sense;
 	}
