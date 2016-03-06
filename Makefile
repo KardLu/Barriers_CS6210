@@ -1,5 +1,6 @@
 CC = gcc
 CXX = mpic++
+MPICC = mpicc
 CFLAGS = -g -Wall
 CXXFLAGS = -std=c++11
 MPFLAGS = -fopenmp -DLEVEL1_DCACHE_LINESIZE=`getconf LEVEL1_DCACHE_LINESIZE`
@@ -23,8 +24,8 @@ mpi_tournament: $(MPI_DIR)/Tournament.cc $(BIN_DIR)
 mpi_mcs: $(MPI_DIR)/MCS.cc $(BIN_DIR)
 	$(CXX) -o $(BIN_DIR)/mcs $< $(CFLAGS)
 
-combine: combine.cpp $(BIN_DIR)
-	$(CXX) -o $(BIN_DIR)/combine $< $(CFLAGS) $(MPFLAGS) $(CXXFLAGS)
+combine: combine.c $(BIN_DIR)
+	$(MPICC) -o $(BIN_DIR)/combine $< $(CFLAGS) $(MPFLAGS)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
