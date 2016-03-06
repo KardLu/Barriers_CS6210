@@ -5,7 +5,6 @@
 
 	By Zenong Lu, March 4 2016
 **********************************************************************/
-#include <cstdlib>
 #include <mpi.h>
 #include <iostream>
 #include <stdlib.h>
