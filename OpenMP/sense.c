@@ -4,9 +4,13 @@
 #include <stdbool.h>
 #include <time.h>
 
+// global counter variable
 int count;
+
+// global sense variable
 bool sense;
-void gtmp_barrier();
+
+void omp_barrier();
 
 int main(int argc, char **argv) {
 	if (argc < 3) {
@@ -28,18 +32,15 @@ int main(int argc, char **argv) {
 		for (i = 0;i < iters;i++) {
 			// printf("thread %d reaches the barrier!\n", omp_get_thread_num());
 			// fflush(stdout);
-			gtmp_barrier(&local_sense);
-			// printf("thread %d gets through the barrier!\n", omp_get_thread_num());
-			// fflush(stdout);
+			omp_barrier(&local_sense);
 		}
-
 	}
 	end = clock();
 	printf("time: %lf\n", (double) (end - start) / CLOCKS_PER_SEC);
 	return 0;
 }
 
-void gtmp_barrier(bool *local_sense){
+void omp_barrier(bool *local_sense) {
 	*local_sense = !(*local_sense);
 
 	if (__sync_fetch_and_sub(&count, 1) == 1) {
@@ -47,6 +48,6 @@ void gtmp_barrier(bool *local_sense){
 		sense = *local_sense;
 	}
 	else {
-		while (sense != (*local_sense)) {}
+		while (sense != (*local_sense));
 	}
 }

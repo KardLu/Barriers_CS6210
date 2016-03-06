@@ -1,6 +1,7 @@
 CC = gcc
 CXX = mpic++
 CFLAGS = -g -Wall
+CXXFLAGS = -std=c++11
 MPFLAGS = -fopenmp -DLEVEL1_DCACHE_LINESIZE=`getconf LEVEL1_DCACHE_LINESIZE`
 
 BIN_DIR = bin
@@ -8,7 +9,7 @@ OBJ_DIR = obj
 OPENMP_DIR = OpenMP
 MPI_DIR = MPI
 
-all: omp_sense omp_tree mpi_tournament mpi_mcs
+all: omp_sense omp_tree mpi_tournament mpi_mcs combine
 
 omp_sense: $(OPENMP_DIR)/sense.c $(BIN_DIR)
 	$(CC) -o $(BIN_DIR)/sense $< $(CFLAGS) $(MPFLAGS)
@@ -21,6 +22,9 @@ mpi_tournament: $(MPI_DIR)/Tournament.cc $(BIN_DIR)
 
 mpi_mcs: $(MPI_DIR)/MCS.cc $(BIN_DIR)
 	$(CXX) -o $(BIN_DIR)/mcs $< $(CFLAGS)
+
+combine: combine.cpp $(BIN_DIR)
+	$(CXX) -o $(BIN_DIR)/combine $< $(CFLAGS) $(MPFLAGS) $(CXXFLAGS)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)

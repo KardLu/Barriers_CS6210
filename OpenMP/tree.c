@@ -4,46 +4,6 @@
 #include <omp.h>
 #include <time.h>
 
-/*
-    From the MCS Paper: A scalable, distributed tree-based barrier with only local spinning.
-
-    type treenode = record
-        parentsense : Boolean
-	    parentpointer : ^Boolean
-	    childpointers : array [0..1] of ^Boolean
-	    havechild : array [0..3] of Boolean
-	    childnotready : array [0..3] of Boolean
-	    dummy : Boolean //pseudo-data
-
-    shared nodes : array [0..P-1] of treenode
-        // nodes[vpid] is allocated in shared memory
-        // locally accessible to processor vpid
-    processor private vpid : integer // a unique virtual processor index
-    processor private sense : Boolean
-
-    // on processor i, sense is initially true
-    // in nodes[i]:
-    //    havechild[j] = true if 4 * i + j + 1 < P; otherwise false
-    //    parentpointer = &nodes[floor((i-1)/4].childnotready[(i-1) mod 4],
-    //        or dummy if i = 0
-    //    childpointers[0] = &nodes[2*i+1].parentsense, or &dummy if 2*i+1 >= P
-    //    childpointers[1] = &nodes[2*i+2].parentsense, or &dummy if 2*i+2 >= P
-    //    initially childnotready = havechild and parentsense = false
-	
-    procedure tree_barrier
-        with nodes[vpid] do
-	        repeat until childnotready = {false, false, false, false}
-	    childnotready := havechild //prepare for next barrier
-	    parentpointer^ := false //let parent know I'm ready
-	    // if not root, wait until my parent signals wakeup
-	    if vpid != 0
-	        repeat until parentsense = sense
-	    // signal children in wakeup tree
-	    childpointers[0]^ := sense
-	    childpointers[1]^ := sense
-	    sense := not sense
-*/
-
 typedef struct {
     bool parentsense;
     bool *parentpointer;
@@ -57,13 +17,14 @@ typedef struct {
 
 int num_threads;
 
+// shared array
 treenode* nodes;
 
-void gtmp_init();
+void omp_init();
 
-void gtmp_barrier(int, bool);
+void omp_barrier(int, bool);
 
-void gtmp_finalize();
+void omp_finalize();
 
 int main(int argc, char **argv) {
     if (argc < 3) {
@@ -74,7 +35,7 @@ int main(int argc, char **argv) {
     num_threads = atoi(argv[1]);
     int iters = atoi(argv[2]);
     omp_set_num_threads(num_threads);
-    gtmp_init();
+    omp_init();
 
     clock_t start, end;
     start = clock();
@@ -86,20 +47,18 @@ int main(int argc, char **argv) {
         for (i = 0;i < iters;i++) {
             // printf("thread %d reaches the barrier!\n", omp_get_thread_num());
             // fflush(stdout);
-            gtmp_barrier(tid, local_sense);
+            omp_barrier(tid, local_sense);
             local_sense = !local_sense;
-            // printf("thread %d gets through the barrier!\n", omp_get_thread_num());
-            // fflush(stdout);
         }
     }
     end = clock();
     printf("time: %lf\n", (double) (end - start) / CLOCKS_PER_SEC);
 
-    gtmp_finalize();
+    omp_finalize();
     return 0;
 }
 
-void gtmp_init(){
+void omp_init(){
     posix_memalign((void **) &nodes, LEVEL1_DCACHE_LINESIZE, num_threads * LEVEL1_DCACHE_LINESIZE);
     // nodes = (treenode *) malloc(num_threads * sizeof(treenode));
     int i, j;
@@ -130,10 +89,10 @@ void gtmp_init(){
     }
 }
 
-void gtmp_barrier(int tid, bool sense){
+void omp_barrier(int tid, bool sense){
     int i;
     for (i = 0;i < 4;i++) {
-        while (nodes[tid].childnotready[i]) ;
+        while (nodes[tid].childnotready[i]);
         nodes[tid].childnotready[i] = nodes[tid].havechild[i];
     }
     *(nodes[tid].parentpointer) = false;
@@ -144,6 +103,6 @@ void gtmp_barrier(int tid, bool sense){
     *(nodes[tid].childpointers[1]) = sense;
 }
 
-void gtmp_finalize(){
+void omp_finalize(){
     free(nodes);
 }
