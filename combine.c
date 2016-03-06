@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     #pragma omp parallel default(shared)
     {
         bool local_sense = true;
-        int tid = omp_get_thread_num();
         int i;
         for (i = 0;i < iters;i++) {
             // printf("thread %d from process %d reaches the barrier!\n", tid, rank);
