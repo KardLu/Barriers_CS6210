@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
         int tid = omp_get_thread_num();
         int i;
         for (i = 0;i < iters;i++) {
-            printf("thread %d from process %d reaches the barrier!\n", tid, rank);
-            fflush(stdout);
+            // printf("thread %d from process %d reaches the barrier!\n", tid, rank);
+            // fflush(stdout);
             omp_barrier(&local_sense);
         }
     }
